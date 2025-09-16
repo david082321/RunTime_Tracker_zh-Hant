@@ -91,9 +91,7 @@
 **响应：**
 返回应用切换记录数组，每条记录包含：
 - `appName` (string) - 应用名称
-- `startTime` (date) - 应用开始时间
-- `endTime` (date) - 应用结束时间
-- `duration` (number) - 应用运行时长(秒)
+- `timestamp` (date) - 应用开始时间
 - `running` (boolean) - 应用是否正在运行
 
 ### GET /api/stats/:deviceId
