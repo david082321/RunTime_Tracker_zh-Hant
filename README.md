@@ -23,14 +23,9 @@
 
 ## 组件链接
 
-### Windows 客户端
-- 地址：[https://github.com/1812z/Tracker_winpy_client](https://github.com/1812z/Tracker_winpy_client)
-- 说明：Windows 平台上的时间跟踪客户端，用于发送当前应用状态
-
-### 安卓 客户端
-- 地址：待开发(目前用Macrodroid局限性太大)
-- 说明：安卓 平台上的时间跟踪客户端，用于发送当前应用状态和当前电量
-
+### Android/Win 客户端
+- 地址：[https://github.com/1812z/Time_Tracker_client](https://github.com/1812z/Time_Tracker_client)
+- 说明：支持多设备的的时间跟踪客户端，用于发送当前应用状态
 
 ### Web 前端
 - 地址：[https://github.com/1812z/RunTime_Tracker_Web](https://github.com/1812z/RunTime_Tracker_Web)
