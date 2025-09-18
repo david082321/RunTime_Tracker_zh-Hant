@@ -24,7 +24,7 @@
 ## 组件链接
 
 ### Android/Win 客户端
-- 地址：[https://github.com/1812z/Time_Tracker_client](https://github.com/1812z/Time_Tracker_client)
+- 地址：[https://github.com/1812z/Tracker_Client](https://github.com/1812z/Tracker_Client)
 - 说明：支持多设备的的时间跟踪客户端，用于发送当前应用状态
 
 ### Web 前端
