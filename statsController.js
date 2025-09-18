@@ -76,14 +76,12 @@ async function recordUsage(deviceId, appName, running) {
     if (running === false) {
         if (deviceSwitches.length > 0) {
             const lastSwitch = deviceSwitches[0];
-            // 计算从上次记录到当前时间的持续时间
             if (lastSwitch.running !== false) {
                 const minutesSinceLastSwitch = calculatePreciseMinutes(lastSwitch.timestamp, now);
+                // 更新应用分时段时间统计，传递完整的开始时间戳
                 await updateDailyStat(deviceId, lastSwitch.appName, lastSwitch.timestamp, minutesSinceLastSwitch);
             }
-            // 更新最后一条记录的状态为停止
             deviceSwitches[0].running = false;
-            // 添加停止记录点
             deviceSwitches.unshift({
                 appName: "设备待机",
                 timestamp: now,
@@ -97,9 +95,9 @@ async function recordUsage(deviceId, appName, running) {
     let minutesSinceLastSwitch = 0;
     if (deviceSwitches.length > 0) {
         const lastSwitch = deviceSwitches[0];
-        // 如果设备正在运行才计算时间
         if (lastSwitch.running !== false) {
             minutesSinceLastSwitch = calculatePreciseMinutes(lastSwitch.timestamp, now);
+            // 关键修改：传递完整的开始时间戳
             await updateDailyStat(deviceId, lastSwitch.appName, lastSwitch.timestamp, minutesSinceLastSwitch);
         }
     }
@@ -125,107 +123,111 @@ function calculatePreciseMinutes(startTime, endTime) {
 }
 
 // 更新每日统计
-async function updateDailyStat(deviceId, appName, timestamp, durationMinutes) {
-    const date = new Date(timestamp);
-    date.setHours(0, 0, 0, 0);
-
-    const hour = timestamp.getHours();
+async function updateDailyStat(deviceId, appName, startTimestamp, durationMinutes) {
+    const startDate = new Date(startTimestamp);
+    const dayStart = new Date(startDate);
+    dayStart.setHours(0, 0, 0, 0);
 
     // 查找或创建统计记录
     let stat = await DailyStat.findOne({
         deviceId,
-        date,
+        date: dayStart,
         appName
     });
 
     if (!stat) {
         stat = new DailyStat({
             deviceId,
-            date,
+            date: dayStart,
             appName,
             hourlyUsage: Array(24).fill(0)
         });
     }
 
-    // 处理持续时间分配（支持跨日期）
-    await distributePreciseMinutes(stat, hour, durationMinutes);
+    // 传递完整的开始时间戳和持续时间
+    await distributePreciseMinutes(stat, startTimestamp, durationMinutes);
 
-    // 保存当前统计记录
     await stat.save();
 }
-async function distributePreciseMinutes(stat, startHour, totalMinutes) {
+async function distributePreciseMinutes(stat, startTimestamp, totalMinutes) {
     let remainingMinutes = totalMinutes;
-    let currentHour = startHour;
-    let currentStat = stat; // 当前统计记录
-    let currentDate = new Date(stat.date); // 当前日期
+    let currentTimestamp = new Date(startTimestamp);
 
     while (remainingMinutes > 0) {
-        // 如果当前小时超出23点，需要创建或获取下一天的统计记录
-        if (currentHour >= 24) {
-            // 移动到下一天
-            currentDate.setDate(currentDate.getDate() + 1);
-            currentDate.setHours(0, 0, 0, 0);
-            currentHour = 0;
+        const currentDate = new Date(currentTimestamp);
+        currentDate.setHours(0, 0, 0, 0);
 
-            // 查找或创建下一天的统计记录
-            let nextDayStat = await DailyStat.findOne({
+        const currentHour = currentTimestamp.getHours();
+        const currentMinute = currentTimestamp.getMinutes();
+        const currentSecond = currentTimestamp.getSeconds();
+
+        // 如果跨日期了，需要获取新的统计记录
+        let currentStat = stat;
+        if (currentDate.getTime() !== stat.date.getTime()) {
+            currentStat = await DailyStat.findOne({
                 deviceId: stat.deviceId,
                 date: currentDate,
                 appName: stat.appName
             });
 
-            if (!nextDayStat) {
-                nextDayStat = new DailyStat({
+            if (!currentStat) {
+                currentStat = new DailyStat({
                     deviceId: stat.deviceId,
                     date: new Date(currentDate),
                     appName: stat.appName,
                     hourlyUsage: Array(24).fill(0)
                 });
             }
-
-            currentStat = nextDayStat;
         }
 
-        // 计算当前小时的可用空间
+        // 计算当前小时内已使用的分钟数（从小时开始到当前分钟）
         const usedInCurrentHour = currentStat.hourlyUsage[currentHour];
-        const availableSpace = 60 - usedInCurrentHour;
 
-        if (availableSpace <= 0) {
-            // 当前小时已满，跳到下一小时
-            currentHour++;
-            continue;
+        // 计算当前时间点到下一个小时开始还有多少分钟
+        const minutesToNextHour = 60 - currentMinute - (currentSecond > 0 ? (currentSecond / 60) : 0);
+
+        // 当前小时的剩余容量
+        const availableSpace = Math.max(0, 60 - usedInCurrentHour);
+
+        // 实际能在当前小时分配的时间：取剩余时间、到下一小时的时间、可用空间的最小值
+        const minutesToAdd = Math.min(remainingMinutes, minutesToNextHour, availableSpace);
+
+        if (minutesToAdd > 0) {
+            const preciseMinutesToAdd = Math.round(minutesToAdd * 100) / 100;
+            currentStat.hourlyUsage[currentHour] = Math.round((currentStat.hourlyUsage[currentHour] + preciseMinutesToAdd) * 100) / 100;
+
+            // 如果是跨日期的新统计记录，需要保存
+            if (currentStat !== stat) {
+                await currentStat.save();
+            }
+
+            remainingMinutes = Math.round((remainingMinutes - preciseMinutesToAdd) * 100) / 100;
         }
 
-        // 计算要添加到当前小时的分钟数
-        const minutesToAdd = Math.min(remainingMinutes, availableSpace);
-        const preciseMinutesToAdd = Math.round(minutesToAdd * 100) / 100;
-
-        // 更新统计数据
-        currentStat.hourlyUsage[currentHour] = Math.round((currentStat.hourlyUsage[currentHour] + preciseMinutesToAdd) * 100) / 100;
-
-        // 如果这是新创建的下一天记录，需要保存
-        if (currentStat !== stat) {
-            await currentStat.save();
+        // 移动到下一个时间点
+        if (minutesToAdd >= minutesToNextHour) {
+            // 移动到下一个小时的开始
+            currentTimestamp.setHours(currentHour + 1, 0, 0, 0);
+        } else {
+            // 在当前小时内完成了分配
+            break;
         }
-
-        // 更新剩余时间
-        remainingMinutes = Math.round((remainingMinutes - preciseMinutesToAdd) * 100) / 100;
 
         // 避免浮点数精度问题
         if (remainingMinutes < 0.01) {
             remainingMinutes = 0;
         }
 
-        currentHour++;
-
-        // 防止无限循环（最多处理7天）
-        const daysDifference = Math.floor((currentDate - stat.date) / (24 * 60 * 60 * 1000));
-        if (daysDifference > 7) {
-            console.warn(`超过7天限制，剩余 ${remainingMinutes} 分钟无法分配，设备: ${stat.deviceId}, 应用: ${stat.appName}`);
+        // 防止无限循环（最多处理30天）
+        const daysDifference = Math.floor((currentTimestamp - startTimestamp) / (24 * 60 * 60 * 1000));
+        if (daysDifference > 30) {
+            console.warn(`超过30天限制，剩余 ${remainingMinutes} 分钟无法分配，设备: ${stat.deviceId}, 应用: ${stat.appName}`);
             break;
         }
     }
 }
+
+
 // 获取某天的统计数据
 async function getDailyStats(deviceId, date, timezoneOffset = 0) {
     // 用户时区的目标日期
