@@ -38,10 +38,48 @@
 
 ## 环境要求
 
+### Docker Compose 部署
+
+- Docker 和 Docker Compose
+
+### 手动安装
 - Node.js 版本 22 或更高
-- mongodb数据库 版本 8 或更高
+- MongoDB 数据库 版本 8 或更高
  
 ## 安装说明
+
+### 方法一：Docker Compose 部署（推荐）
+
+1. **下载必要文件**
+   ```bash
+   wget https://raw.githubusercontent.com/1812z/RunTime_Tracker/main/docker-compose.yml
+   wget https://raw.githubusercontent.com/1812z/RunTime_Tracker/main/.example.env -O .env
+   ```
+
+2. **配置环境变量**
+
+   编辑 .env 文件，修改以下配置：
+    - **SECRET**: 设置你的密钥（用于API认证）
+    - **MONGODB_URI**: 数据库连接信息（默认已配置好，可修改密码）
+
+3. **启动服务**
+   ```bash
+   # 启动所有服务
+   docker-compose up -d
+   
+   # 查看服务状态
+   docker-compose ps
+   
+   # 查看日志
+   docker-compose logs -f
+   ```
+
+4. **访问应用**
+    - 访问 `http://localhost:3000` （若在服务器部署，替换localhost为服务器IP，有需要可配合反向代理使用）
+    - API 地址为 `http://localhost:3000/api`
+
+### 方法二：手动安装
+
 0.配置NodeJS环境22 + mongodb数据库8 (推荐使用1panel或docker一键安装)  
 1.配置 `.env` 文件，设置好密钥，端口，数据库链接  
 2.启动，开放对应端口(前端端口，后端端口)    
