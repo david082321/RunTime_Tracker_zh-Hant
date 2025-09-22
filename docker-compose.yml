@@ -1,0 +1,31 @@
+services:
+  # MongoDB 服务
+  mongodb:
+    image: mongo:8.0
+    restart: unless-stopped
+    expose:
+      - "27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+    volumes:
+      - ./data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - SECRET=${SECRET}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://admin:password@mongodb:27017/deviceStats?authSource=admin}
+    depends_on:
+      mongodb:
+        condition: service_healthy
