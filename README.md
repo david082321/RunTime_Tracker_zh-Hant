@@ -31,6 +31,10 @@
 - 地址：[https://github.com/1812z/RunTime_Tracker_Web](https://github.com/1812z/RunTime_Tracker_Web)
 - 说明：基于 Vue.js 的 Web 界面，用于查看和分析时间跟踪数据
 
+### Github嵌入图  
+预览: [![我的~~娱乐~~开发设备](https://device-svg-generator.2023158207.workers.dev/devices-svg?api=https://api-usage.1812z.top/api/devices)]()
+- 说明：将API地址换成你的API地址即可嵌入使用
+- CF Worker节点: `https://device-svg-generator.2023158207.workers.dev/devices-svg?api={你的API}`
 ### 后端 (当前仓库)
 - Node.js 版本要求：22
 - 需要mongodb数据库链接
