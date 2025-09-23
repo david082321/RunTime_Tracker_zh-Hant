@@ -32,7 +32,7 @@
 - 说明：基于 Vue.js 的 Web 界面，用于查看和分析时间跟踪数据
 
 ### Github嵌入图  
-预览: [![我的~~娱乐~~开发设备](https://device-svg-generator.2023158207.workers.dev/devices-svg?api=https://api-usage.1812z.top/api/devices)]()
+[![我的~~娱乐~~开发设备](https://device-svg-generator.2023158207.workers.dev/devices-svg?api=https://api-usage.1812z.top/api/devices)]()
 - 说明：将API地址换成你的API地址即可嵌入使用
 - CF Worker节点: `https://device-svg-generator.2023158207.workers.dev/devices-svg?api={你的API}`
 ### 后端 (当前仓库)
@@ -84,11 +84,11 @@
 
 ### 方法二：手动安装
 
-0.配置NodeJS环境22 + mongodb数据库8 (推荐使用1panel或docker一键安装)  
-1.配置 `.env` 文件，设置好密钥，端口，数据库链接  
-2.启动，开放对应端口(前端端口，后端端口)    
-3.前端配置文件(config.js)填入后端API地址  
-4.对应客户端接入后端API  
+1. 配置NodeJS环境22 + mongodb数据库8 (推荐使用1panel或docker一键安装)  
+2. 配置 `.env` 文件，设置好密钥，端口，数据库链接  
+3. 启动，开放对应端口(前端端口，后端端口)    
+4. 前端配置文件(config.js)填入后端API地址  
+5. 对应客户端接入后端API  
 
 # API 接口列表
 
