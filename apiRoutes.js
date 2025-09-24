@@ -101,9 +101,9 @@ router.get('/stats/:deviceId', async (req, res) => {
     try {
         // 获取时区偏移,默认为0 (UTC)
         const timezoneOffset = parseInt(req.query.timezoneOffset) || 0;
-        if (timezoneOffset < -720 || timezoneOffset > 720) {
+        if (timezoneOffset < -12 || timezoneOffset > 12) {
             return res.status(400).json({
-                error: 'Invalid timezoneOffset. Must be between -720 and +720 (UTC-12 to UTC+12).',
+                error: 'Invalid timezoneOffset. Must be between -12 and +12 (UTC-12 to UTC+12).',
             });
         }
         // 获取日期参数,如果没有则默认为当天
@@ -129,6 +129,40 @@ router.get('/stats/:deviceId', async (req, res) => {
         res.json(stats);
     } catch (error) {
         console.error('Error in /api/stats/:deviceId:', error);
+        res.status(500).json({
+            error: 'Database error',
+            details: error.message
+        });
+    }
+});
+
+// 获取周统计数据 (7天内某个应用的每日使用时间)
+router.get('/weekly/:deviceId', async (req, res) => {
+    try {
+        // 获取时区偏移,默认为0 (UTC)
+        const timezoneOffset = parseInt(req.query.timezoneOffset) || 0;
+        if (timezoneOffset < -12 || timezoneOffset > 12) {
+            return res.status(400).json({
+                error: 'Invalid timezoneOffset. Must be between -12 and +12 (UTC-12 to UTC+12).',
+            });
+        }
+
+        // 获取周偏移参数: 0=本周, -1=上周, -2=上上周, 1=下周 (一般不用)
+        const weekOffset = parseInt(req.query.weekOffset) || 0;
+
+        // 获取应用名称 (可选)
+        const appName = req.query.appName || null;
+
+        const stats = await statsQuery.getWeeklyAppStats(
+            req.params.deviceId,
+            appName,
+            weekOffset,
+            timezoneOffset
+        );
+
+        res.json(stats);
+    } catch (error) {
+        console.error('Error in /api/weekly/:deviceId:', error);
         res.status(500).json({
             error: 'Database error',
             details: error.message
