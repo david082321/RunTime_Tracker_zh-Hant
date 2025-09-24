@@ -8,7 +8,8 @@ RUN npm ci --only=production
 
 COPY index.js ./
 COPY apiRoutes.js ./
-COPY statsController.js ./
+COPY StatsRecorder.js ./
+COPY StatsQuery.js ./
 COPY public/ ./public/
 
 RUN addgroup -g 1001 -S nodejs

@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { SECRET} = require('./index');
+const { SECRET } = require('./index');
 
-// 导入必要的函数
-const {
-    recordBattery,
-    getDevices,
-    recordUsage,
-    getDailyStats,
-    recentAppSwitches
-} = require('./statsController'); // 状态控制文件
+// 导入模块
+const StatsRecorder = require('./StatsRecorder');
+const StatsQuery = require('./StatsQuery');
+
+// 创建实例
+const statsRecorder = new StatsRecorder();
+const statsQuery = new StatsQuery(statsRecorder);
 
 // 应用上报API
 router.post('/', async (req, res) => {
@@ -24,10 +23,10 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ error: 'Missing app_name when running is true' });
     }
     if (batteryLevel !== undefined && batteryLevel > 0 && batteryLevel < 101) {
-        recordBattery(device, batteryLevel);
+        statsRecorder.recordBattery(device, batteryLevel);
     }
     try {
-        await recordUsage(device, app_name, running, batteryLevel);
+        await statsRecorder.recordUsage(device, app_name, running, batteryLevel);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Database error' });
@@ -37,19 +36,19 @@ router.post('/', async (req, res) => {
 // 获取设备列表
 router.get('/devices', async (req, res) => {
     try {
-        const devices = await getDevices();
+        const devices = await statsQuery.getDevices();
         res.json(devices);
     } catch (error) {
         res.status(500).json({ error: 'Database error' });
     }
 });
 
-// 获取所有设备的全部切换记录（测试用）
+// 获取所有设备的全部切换记录(测试用)
 router.get('/recentall', (req, res) => {
     try {
         // 将Map转换为数组形式
         const allRecords = {};
-        recentAppSwitches.forEach((switches, deviceId) => {
+        statsRecorder.recentAppSwitches.forEach((switches, deviceId) => {
             allRecords[deviceId] = switches.map(entry => ({
                 appName: entry.appName,
                 timestamp: entry.timestamp,
@@ -59,7 +58,7 @@ router.get('/recentall', (req, res) => {
         res.json({
             success: true,
             data: allRecords,
-            count: recentAppSwitches.size
+            count: statsRecorder.recentAppSwitches.size
         });
     } catch (error) {
         res.status(500).json({
@@ -74,8 +73,8 @@ router.get('/recent/:deviceId', async (req, res) => {
     try {
         const deviceId = req.params.deviceId;
         let records = [];
-        if (recentAppSwitches.has(deviceId)) {
-            const switchEntries = recentAppSwitches.get(deviceId)
+        if (statsRecorder.recentAppSwitches.has(deviceId)) {
+            const switchEntries = statsRecorder.recentAppSwitches.get(deviceId)
             // 转换为所需格式
             records = switchEntries.map(entry => ({
                 appName: entry.appName,
@@ -100,14 +99,14 @@ router.get('/recent/:deviceId', async (req, res) => {
 // 获取当天统计数据
 router.get('/stats/:deviceId', async (req, res) => {
     try {
-        // 获取时区偏移，默认为0 (UTC)
+        // 获取时区偏移,默认为0 (UTC)
         const timezoneOffset = parseInt(req.query.timezoneOffset) || 0;
-        if ( timezoneOffset < -720 || timezoneOffset > 720) {
+        if (timezoneOffset < -720 || timezoneOffset > 720) {
             return res.status(400).json({
                 error: 'Invalid timezoneOffset. Must be between -720 and +720 (UTC-12 to UTC+12).',
             });
         }
-        // 获取日期参数，如果没有则默认为当天
+        // 获取日期参数,如果没有则默认为当天
         let date;
         if (req.query.date) {
             date = new Date(req.query.date);
@@ -121,7 +120,7 @@ router.get('/stats/:deviceId', async (req, res) => {
             date = new Date();
         }
         date.setHours(0, 0, 0, 0);
-        const stats = await getDailyStats(req.params.deviceId, date, timezoneOffset);
+        const stats = await statsQuery.getDailyStats(req.params.deviceId, date, timezoneOffset);
         if (!stats) {
             return res.status(404).json({
                 error: 'No records found for this date'
@@ -151,7 +150,7 @@ function getClientIp(req) {
             ? forwarded.split(',')[0].trim()
             : forwarded[0].trim();
     }
-    // 如果没有代理，直接使用connection的remoteAddress
+    // 如果没有代理,直接使用connection的remoteAddress
     return req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip;
 }
 
