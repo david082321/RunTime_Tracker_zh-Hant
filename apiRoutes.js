@@ -170,6 +170,40 @@ router.get('/weekly/:deviceId', async (req, res) => {
     }
 });
 
+// 获取月统计数据 (整月内某个应用的每日使用时间)
+router.get('/monthly/:deviceId', async (req, res) => {
+    try {
+        // 获取时区偏移,默认为0 (UTC)
+        const timezoneOffset = parseInt(req.query.timezoneOffset) || 0;
+        if (timezoneOffset < -12 || timezoneOffset > 12) {
+            return res.status(400).json({
+                error: 'Invalid timezoneOffset. Must be between -12 and +12 (UTC-12 to UTC+12).',
+            });
+        }
+
+        // 获取月偏移参数: 0=本月, -1=上月, -2=上上月, 1=下月 (一般不用)
+        const monthOffset = parseInt(req.query.monthOffset) || 0;
+
+        // 获取应用名称 (可选)
+        const appName = req.query.appName || null;
+
+        const stats = await statsQuery.getMonthlyAppStats(
+            req.params.deviceId,
+            appName,
+            monthOffset,
+            timezoneOffset
+        );
+
+        res.json(stats);
+    } catch (error) {
+        console.error('Error in /api/monthly/:deviceId:', error);
+        res.status(500).json({
+            error: 'Database error',
+            details: error.message
+        });
+    }
+});
+
 // 获取客户端IP地址
 router.get('/ip', (req, res) => {
     const clientIp = getClientIp(req);
