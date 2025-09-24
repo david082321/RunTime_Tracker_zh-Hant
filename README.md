@@ -158,6 +158,70 @@
 - `timezoneOffset` (number) - 时区偏移(分钟)
 - `appName` (string) - 应用名称
 
+### GET /api/weekly/:deviceId
+获取指定设备某周的统计数据（7天内每个应用的每日使用时间）。
+
+**路径参数：**
+- `deviceId` (string) - 设备标识符
+
+**查询参数：**
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `weekOffset` | number | 0 | 周偏移（0=本周，-1=上周，-2=上上周） |
+| `timezoneOffset` | number | 0 | 时区偏移（分钟，例如UTC+8为480） |
+| `appName` | string | null | 应用名称（可选，不传则返回所有应用） |
+
+**响应：**
+- `weekOffset` (number) - 周偏移值
+- `weekRange` (object) - 周日期范围
+    - `start` (string) - 开始日期（YYYY-MM-DD）
+    - `end` (string) - 结束日期（YYYY-MM-DD）
+- `timezoneOffset` (number) - 时区偏移（分钟）
+- `dailyTotals` (object) - 每日总使用时长统计（分钟）
+    - `key: YYYY-MM-DD` - 日期
+    - `value: number` - 该日总使用时长（分钟）
+- `appDailyStats` (object) - 各应用每日使用时长统计
+    - `key: appName` - 应用名称
+    - `value: object` - 该应用的每日统计
+        - `key: YYYY-MM-DD` - 日期
+        - `value: number` - 该应用在该日的使用时长（分钟）
+
+**示例请求：**
+```http
+GET /api/weekly/device123?weekOffset=0&timezoneOffset=8
+GET /api/weekly/device123?weekOffset=-1&appName=微信&timezoneOffset=8
+```
+
+**示例响应：**
+```json
+{
+  "weekOffset": 0,
+  "weekRange": {
+    "start": "2025-09-22",
+    "end": "2025-09-24"
+  },
+  "timezoneOffset": 480,
+  "dailyTotals": {
+    "2025-09-22": 120.5,
+    "2025-09-23": 180.25,
+    "2025-09-24": 95.75
+  },
+  "appDailyStats": {
+    "微信": {
+      "2025-09-22": 60.5,
+      "2025-09-23": 80.25,
+      "2025-09-24": 45.0
+    },
+    "抖音": {
+      "2025-09-22": 60.0,
+      "2025-09-23": 100.0,
+      "2025-09-24": 50.75
+    }
+  }
+}
+```
+
 ### GET /api/ip
 获取客户端IP地址。
 
