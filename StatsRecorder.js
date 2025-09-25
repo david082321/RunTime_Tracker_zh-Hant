@@ -58,7 +58,7 @@ class StatsRecorder {
                 }
                 deviceSwitches[0].running = false;
                 deviceSwitches.unshift({
-                    appName: "设备待机",
+                    appName: "裝置待機",
                     timestamp: now,
                     running: false
                 });
@@ -197,7 +197,7 @@ class StatsRecorder {
             // 防止无限循环(最多处理30天)
             const daysDifference = Math.floor((currentTimestamp - startTimestamp) / (24 * 60 * 60 * 1000));
             if (daysDifference > 30) {
-                console.warn(`超过30天限制,剩余 ${remainingMinutes} 分钟无法分配,设备: ${stat.deviceId}, 应用: ${stat.appName}`);
+                console.warn(`超過30天限制,剩餘 ${remainingMinutes} 分鐘無法分配,裝置: ${stat.deviceId}, 程式: ${stat.appName}`);
                 break;
             }
         }

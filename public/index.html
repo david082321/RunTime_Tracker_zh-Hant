@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设备监控</title>
+    <title>裝置監控</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -50,9 +50,9 @@
 </head>
 <body>
 <div class="container">
-    <div class="label">当前设备数</div>
+    <div class="label">目前裝置數</div>
     <div class="count" id="deviceCount">0</div>
-    <button class="refresh" onclick="fetchDeviceCount()">刷新数据</button>
+    <button class="refresh" onclick="fetchDeviceCount()">重新整理資料</button>
 </div>
 
 <script>
@@ -66,8 +66,8 @@
             const devices = await response.json();
             document.getElementById('deviceCount').textContent = devices.length;
         } catch (error) {
-            console.error('获取设备数量失败:', error);
-            document.getElementById('deviceCount').textContent = "错误";
+            console.error('取得裝置數量失敗:', error);
+            document.getElementById('deviceCount').textContent = "錯誤";
         }
     }
 </script>
