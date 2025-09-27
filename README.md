@@ -1,6 +1,6 @@
 # RunTime Tracker
 一个时间跟踪应用程序，用于监控和管理您的设备使用时间。
-<img width="2566" height="1162" alt="QQ20250911-123925" src="https://github.com/user-attachments/assets/b25e4700-0c74-4191-943b-33b54dd2cd66" />
+<img width="3022" height="1040" alt="image" src="https://github.com/user-attachments/assets/72aa5a81-a3a1-4c90-8430-dfc5a3595daa" />
 
 ## 安装说明
 [查看安装说明](https://github.com/1812z/RunTime_Tracker/wiki/Installation)
@@ -15,7 +15,7 @@
 - ~~全AI生成~~
 
 
-演示站点：[https://usage.1812z.top/](https://usage.1812z.top/)
+演示站点：[https://sleepy.1812z.top/](https://usage.1812z.top/)
 ## 项目结构
 
 本项目包含以下组件：
