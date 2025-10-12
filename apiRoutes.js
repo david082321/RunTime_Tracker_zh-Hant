@@ -1,14 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { SECRET } = require('./index');
-
-// 导入模块
-const StatsRecorder = require('./StatsRecorder');
-const StatsQuery = require('./StatsQuery');
-
-// 创建实例
-const statsRecorder = new StatsRecorder();
-const statsQuery = new StatsQuery(statsRecorder);
+const { SECRET, statsRecorder, statsQuery, aiSummary } = require('./index');
 
 // 应用上报API
 router.post('/', async (req, res) => {
@@ -226,6 +218,170 @@ router.get('/monthly/:deviceId', async (req, res) => {
             details: error.message
         });
     }
+});
+
+// ==================== AI总结相关API ====================
+
+// 获取最近一次AI总结（无需验证，只读操作）
+router.get('/ai/summary/:deviceId', (req, res) => {
+    try {
+        const deviceId = req.params.deviceId;
+        const summary = aiSummary.getRecentSummary(deviceId);
+
+        if (!summary) {
+            return res.status(404).json({
+                success: false,
+                error: 'No recent summary found for this device',
+                message: '该设备暂无AI总结记录'
+            });
+        }
+
+        res.json({
+            success: true,
+            deviceId,
+            ...summary
+        });
+    } catch (error) {
+        console.error('Error in /api/ai/summary/:deviceId:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve summary',
+            details: error.message
+        });
+    }
+});
+
+// 获取所有设备的最近总结（无需验证，只读操作）
+router.get('/ai/summaries', (req, res) => {
+    try {
+        const summaries = aiSummary.getAllRecentSummaries();
+
+        res.json({
+            success: true,
+            count: Object.keys(summaries).length,
+            summaries
+        });
+    } catch (error) {
+        console.error('Error in /api/ai/summaries:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve summaries',
+            details: error.message
+        });
+    }
+});
+
+// 手动触发AI总结生成 (GET方式，需要secret验证)
+router.get('/ai/trigger/:deviceId', async (req, res) => {
+    try {
+        // 验证secret
+        const { secret, date, timezoneOffset } = req.query;
+
+        if (!secret || secret !== SECRET) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid or missing secret'
+            });
+        }
+
+        const deviceId = req.params.deviceId;
+
+        const result = await aiSummary.triggerSummary(deviceId, {
+            date: date || null,
+            timezoneOffset: timezoneOffset ? parseInt(timezoneOffset) : null
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error in /api/ai/trigger/:deviceId:', error);
+        res.status(500).json({
+            error: 'AI summary generation failed',
+            details: error.message
+        });
+    }
+});
+
+// 获取AI总结状态（无需验证，只读操作）
+router.get('/ai/status', (req, res) => {
+    res.json({
+        enabled: aiSummary.enabled,
+        aiConfigured: !!aiSummary.aiConfig.apiKey,
+        publishConfigured: !!aiSummary.publishConfig.apiUrl,
+        cronJobsCount: aiSummary.cronJobs.length,
+        schedules: ['0:00', '8:00', '16:00'],
+        model: aiSummary.aiConfig.model,
+        defaultTimezone: `UTC${aiSummary.defaultTimezoneOffset >= 0 ? '+' : ''}${aiSummary.defaultTimezoneOffset}`
+    });
+});
+
+// 停止AI定时任务（需要secret验证）
+router.post('/ai/stop', (req, res) => {
+    try {
+        // 验证secret (从query或body中获取)
+        const secret = req.query.secret || req.body.secret;
+
+        if (!secret || secret !== SECRET) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid or missing secret'
+            });
+        }
+
+        aiSummary.stop();
+        res.json({
+            success: true,
+            message: 'AI summary cron jobs stopped'
+        });
+    } catch (error) {
+        console.error('Error in /api/ai/stop:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to stop AI tasks',
+            details: error.message
+        });
+    }
+});
+
+// 启动AI定时任务（需要secret验证）
+router.post('/ai/start', (req, res) => {
+    try {
+        // 验证secret (从query或body中获取)
+        const secret = req.query.secret || req.body.secret;
+
+        if (!secret || secret !== SECRET) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid or missing secret'
+            });
+        }
+
+        aiSummary.start();
+        res.json({
+            success: true,
+            message: 'AI summary cron jobs started'
+        });
+    } catch (error) {
+        console.error('Error in /api/ai/start:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to start AI tasks',
+            details: error.message
+        });
+    }
+});
+
+// 预留：周总结API
+router.post('/ai/weekly/:deviceId', async (req, res) => {
+    res.status(501).json({
+        error: 'Weekly summary not implemented yet',
+        message: '周总结功能将在后续版本中实现'
+    });
+});
+
+// 预留：月总结API
+router.post('/ai/monthly/:deviceId', async (req, res) => {
+    res.status(501).json({
+        error: 'Monthly summary not implemented yet',
+        message: '月总结功能将在后续版本中实现'
+    });
 });
 
 // 获取客户端IP地址

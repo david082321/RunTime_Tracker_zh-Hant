@@ -10,6 +10,7 @@ COPY index.js ./
 COPY apiRoutes.js ./
 COPY StatsRecorder.js ./
 COPY StatsQuery.js ./
+COPY AISummary.js ./
 COPY public/ ./public/
 
 RUN addgroup -g 1001 -S nodejs
