@@ -219,7 +219,7 @@ class AISummary {
                     messages: [
                         {
                             role: 'system',
-                            content: '你是一个以杂鱼风格的分析师'
+                            content: '你是一個以雜魚風格的分析師'
                         },
                         {
                             role: 'user',
@@ -259,36 +259,36 @@ class AISummary {
             .sort((a, b) => b.minutes - a.minutes);
 
         // 构建提示词
-        let prompt = `总结以下设备的应用使用情况\n\n`;
+        let prompt = `總結以下裝置的程式使用情況\n\n`;
 
-        prompt += `- 设备ID: ${deviceId}\n`;
-        prompt += `- 统计日期: ${date}\n\n`;
+        prompt += `- 裝置ID: ${deviceId}\n`;
+        prompt += `- 統計日期: ${date}\n\n`;
 
-        prompt += `## 总体使用情况\n`;
-        prompt += `- 总使用时长: ${Math.floor(totalUsage / 60)}小时${totalUsage % 60}分钟\n`;
-        prompt += `- 使用应用数量: ${Object.keys(appStats).length}个\n\n`;
+        prompt += `## 總體使用情況\n`;
+        prompt += `- 總使用時長: ${Math.floor(totalUsage / 60)}小時${totalUsage % 60}分鐘\n`;
+        prompt += `- 使用程式數量: ${Object.keys(appStats).length}個\n\n`;
 
-        prompt += `## 应用使用占比(TOP 20)\n`;
+        prompt += `## 程式使用占比(TOP 20)\n`;
         appUsageList.slice(0, 20).forEach(({ app, minutes, percentage }) => {
-            prompt += `- ${app}: ${Math.floor(minutes / 60)}小时${minutes % 60}分钟 (${percentage}%)\n`;
+            prompt += `- ${app}: ${Math.floor(minutes / 60)}小時${minutes % 60}分鐘 (${percentage}%)\n`;
         });
 
 
-        prompt += `\n## 最近应用切换记录 (最新${Math.min(recentSwitches.length, 100)}条)\n`;
+        prompt += `\n## 最近程式切換記錄 (最新${Math.min(recentSwitches.length, 100)}條)\n`;
         recentSwitches.slice(0, 10).forEach(({ appName, timestamp, running }) => {
-            const time = new Date(timestamp).toLocaleTimeString('zh-CN', { hour12: false });
-            const status = running ? '打开' : '关闭';
+            const time = new Date(timestamp).toLocaleTimeString('zh-TW', { hour12: false });
+            const status = running ? '打開' : '關閉';
             prompt += `- ${time} ${status} ${appName}\n`;
         });
-        prompt += `请用以下风格输出报告：
-            1. 以"杂鱼~杂鱼♥"开头
-            2. 称呼用户为"大哥哥"或"杂鱼哥哥"
-            3. 使用波浪号和爱心符号(♥)
-            4. 加入"不会吧不会吧"等语气词
-            5. 对使用习惯进行毒舌但可爱的吐槽
-            6. 控制在300字以内
-            7. 可以适当加入"诶嘿~"、"噗噗"等语气词`;
-        prompt += `注意：适当使用emoji表情，控制在300字以内，不要返回md格式，只能换行`;
+        prompt += `請用以下風格輸出報告：
+            1. 以"雜魚~雜魚♥"開頭
+            2. 稱呼使用者為"大哥哥"或"雜魚哥哥"
+            3. 使用波浪號和愛心符號(♥)
+            4. 加入"不會吧不會吧"等語氣詞
+            5. 對使用習慣進行毒舌但可愛的吐槽
+            6. 控制在300字以內
+            7. 可以適當加入"欸嘿~"、"噗噗"等語氣詞`;
+        prompt += `注意：適當使用emoji表情，控制在300字以內，不要返回md格式，只能換行`;
 
         return prompt;
     }
@@ -324,7 +324,7 @@ class AISummary {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`发布API请求失败: ${response.status} ${errorText}`);
+                throw new Error(`發布API請求失敗: ${response.status} ${errorText}`);
             }
 
             const result = await response.json();

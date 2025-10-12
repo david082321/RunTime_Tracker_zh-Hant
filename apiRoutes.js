@@ -232,7 +232,7 @@ router.get('/ai/summary/:deviceId', (req, res) => {
             return res.status(404).json({
                 success: false,
                 error: 'No recent summary found for this device',
-                message: '该设备暂无AI总结记录'
+                message: '該裝置暫無AI總結記錄'
             });
         }
 
@@ -372,7 +372,7 @@ router.post('/ai/start', (req, res) => {
 router.post('/ai/weekly/:deviceId', async (req, res) => {
     res.status(501).json({
         error: 'Weekly summary not implemented yet',
-        message: '周总结功能将在后续版本中实现'
+        message: '周總結功能將在後續版本中實現'
     });
 });
 
@@ -380,7 +380,7 @@ router.post('/ai/weekly/:deviceId', async (req, res) => {
 router.post('/ai/monthly/:deviceId', async (req, res) => {
     res.status(501).json({
         error: 'Monthly summary not implemented yet',
-        message: '月总结功能将在后续版本中实现'
+        message: '月總結功能將在後續版本中實現'
     });
 });
 
