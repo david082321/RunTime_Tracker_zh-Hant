@@ -177,11 +177,18 @@ class AISummary {
                     return entryDateOnly.getTime() === date.getTime();
                 })
                 .slice(0, 200)
-                .map(entry => ({
-                    appName: entry.appName,
-                    timestamp: entry.timestamp,
-                    running: entry.running !== false
-                }));
+                .map(entry => {
+                    // 将UTC时间转换为用户本地时间
+                    const userTime = new Date(entry.timestamp);
+                    userTime.setMinutes(userTime.getMinutes() + timezoneOffset * 60);
+
+                    return {
+                        appName: entry.appName,
+                        timestamp: userTime.toISOString(), // 保持ISO格式
+                        localTime: userTime.toLocaleTimeString('zh-CN', { hour12: false }), // 添加本地时间字符串
+                        running: entry.running !== false
+                    };
+                });
         }
 
         return {
@@ -194,6 +201,7 @@ class AISummary {
             timezoneOffset
         };
     }
+
 
     // 调用AI API
     async callAI(statsData, deviceId) {
@@ -211,7 +219,7 @@ class AISummary {
                     messages: [
                         {
                             role: 'system',
-                            content: '你是一个专业的数字健康分析师,擅长分析用户的应用使用习惯并给出有价值的洞察和建议。'
+                            content: '你是一个以杂鱼风格的分析师'
                         },
                         {
                             role: 'user',
