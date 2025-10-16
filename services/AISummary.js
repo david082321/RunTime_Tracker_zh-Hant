@@ -177,19 +177,13 @@ class AISummary {
                     return entryDateOnly.getTime() === date.getTime();
                 })
                 .slice(0, 200)
-                .map(entry => {
-                    // 将UTC时间转换为用户本地时间
-                    const userTime = new Date(entry.timestamp);
-                    userTime.setMinutes(userTime.getMinutes() + timezoneOffset * 60);
+                .map(entry => ({
+                    appName: entry.appName,
+                    timestamp: entry.timestamp,
+                    running: entry.running !== false
+                }));
+        }
 
-                    return {
-                        appName: entry.appName,
-                        timestamp: userTime.toISOString(), // 保持ISO格式
-                        localTime: userTime.toLocaleTimeString('zh-CN', { hour12: false }), // 添加本地时间字符串
-                        running: entry.running !== false
-                    };
-                });
-}
         return {
             deviceId,
             date: date.toISOString().split('T')[0],
