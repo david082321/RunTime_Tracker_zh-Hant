@@ -1,5 +1,5 @@
 // StatsRecorder.js - 记录信息模块
-const { mongoose } = require('./index');
+const { mongoose } = require('../index');
 
 // 定义新的数据模型 - 按天/小时/应用存储
 const DailyStat = mongoose.model('DailyStat', {
@@ -11,30 +11,34 @@ const DailyStat = mongoose.model('DailyStat', {
 
 class StatsRecorder {
     constructor() {
-        // 设备应用切换记录与电池统计
+        // 设备应用切换记录
         this.recentAppSwitches = new Map(); // {deviceId: [{appName, timestamp}]}
-        this.batteryStats = new Map();
+        // 电池信息存储
+        this.batteryInfo = new Map(); // {deviceId: {level, isCharging, timestamp}}
     }
 
-    // 记录电池信息
-    recordBattery(deviceId, level) {
+// 记录电池信息和充电状态
+    recordBattery(deviceId, level, isCharging = false) {
         const now = new Date();
-        if (!this.batteryStats.has(deviceId)) {
-            this.batteryStats.set(deviceId, []);
-        }
-        this.batteryStats.get(deviceId).push({
-            timestamp: now,
-            level: level
-        });
 
-        if (this.batteryStats.get(deviceId).length > 10) {
-            this.batteryStats.get(deviceId).shift();
-        }
+        this.batteryInfo.set(deviceId, {
+            level: level,
+            isCharging: isCharging,
+            timestamp: now
+        });
     }
 
-    // 获取电量记录
-    getBatteryStats(deviceId) {
-        return this.batteryStats.get(deviceId) || [];
+    // 获取最新电池信息
+    getLatestBatteryInfo(deviceId) {
+        const info = this.batteryInfo.get(deviceId);
+        if (!info) {
+            return {
+                level: 0,
+                isCharging: false,
+                timestamp: null
+            };
+        }
+        return info;
     }
 
     // 记录应用使用时间

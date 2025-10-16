@@ -1,27 +1,52 @@
 const express = require('express');
 const router = express.Router();
-const { SECRET, statsRecorder, statsQuery, aiSummary } = require('./index');
+const { SECRET, statsRecorder, statsQuery, aiSummary } = require('../index');
+// 导入adminRoutes的认证中间件
+const { authenticateToken } = require('./adminRoutes');
 
 // 应用上报API
 router.post('/', async (req, res) => {
-    const { secret, device, app_name, running, batteryLevel } = req.body;
+    const { secret, device, app_name, running, batteryLevel, isCharging } = req.body;
+
     if (secret !== SECRET) {
         return res.status(401).json({ error: 'Invalid secret' });
     }
+
     if (!device) {
         return res.status(400).json({ error: 'Missing device' });
     }
-    if (running !== false && !app_name) {
-        return res.status(400).json({ error: 'Missing app_name when running is true' });
-    }
-    if (batteryLevel !== undefined && batteryLevel > 0 && batteryLevel < 101) {
-        statsRecorder.recordBattery(device, batteryLevel);
-    }
+
     try {
-        await statsRecorder.recordUsage(device, app_name, running, batteryLevel);
-        res.json({ success: true });
+        // 1. 处理电池信息
+        if (batteryLevel !== undefined && batteryLevel > 0 && batteryLevel <= 100) {
+            const chargingStatus = isCharging === true;
+            statsRecorder.recordBattery(device, batteryLevel, chargingStatus);
+        }
+
+        // 2. 处理应用信息
+        if (app_name !== undefined || running !== undefined) {
+            // 校验应用信息的完整性
+            if (running !== false && !app_name) {
+                return res.status(400).json({
+                    error: 'Missing app_name when running is true'
+                });
+            }
+
+            await statsRecorder.recordUsage(device, app_name, running);
+        }
+
+        // 返回成功响应
+        res.json({
+            success: true,
+            batteryInfo: statsRecorder.getLatestBatteryInfo(device),
+            timestamp: new Date()
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Database error' });
+        console.error('Record error:', error);
+        res.status(500).json({
+            error: 'Database error',
+            details: error.message
+        });
     }
 });
 
@@ -286,62 +311,6 @@ router.get('/ai/status', (req, res) => {
         model: aiSummary.aiConfig.model,
         defaultTimezone: `UTC${aiSummary.defaultTimezoneOffset >= 0 ? '+' : ''}${aiSummary.defaultTimezoneOffset}`
     });
-});
-
-// 停止AI定时任务（需要secret验证）
-router.post('/ai/stop', (req, res) => {
-    try {
-        // 验证secret (从query或body中获取)
-        const secret = req.query.secret || req.body.secret;
-
-        if (!secret || secret !== SECRET) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid or missing secret'
-            });
-        }
-
-        aiSummary.stop();
-        res.json({
-            success: true,
-            message: 'AI summary cron jobs stopped'
-        });
-    } catch (error) {
-        console.error('Error in /api/ai/stop:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to stop AI tasks',
-            details: error.message
-        });
-    }
-});
-
-// 启动AI定时任务（需要secret验证）
-router.post('/ai/start', (req, res) => {
-    try {
-        // 验证secret (从query或body中获取)
-        const secret = req.query.secret || req.body.secret;
-
-        if (!secret || secret !== SECRET) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid or missing secret'
-            });
-        }
-
-        aiSummary.start();
-        res.json({
-            success: true,
-            message: 'AI summary cron jobs started'
-        });
-    } catch (error) {
-        console.error('Error in /api/ai/start:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to start AI tasks',
-            details: error.message
-        });
-    }
 });
 
 // 预留：周总结API

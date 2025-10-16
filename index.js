@@ -9,6 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.SECRET || 'default-secret-key';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/deviceStats';
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASSWD = process.env.ADMIN_PASSWD || 'admin';
 
 //运行信息
 console.log('后端端口 ', PORT);
@@ -27,11 +29,13 @@ mongoose.connect(MONGODB_URI)
 
 module.exports.mongoose = mongoose;
 module.exports.SECRET = SECRET;
+module.exports.ADMIN_USER = ADMIN_USER;
+module.exports.ADMIN_PASSWD = ADMIN_PASSWD;
 
 // 导入模块
-const StatsRecorder = require('./StatsRecorder');
-const StatsQuery = require('./StatsQuery');
-const AISummary = require('./AISummary');
+const StatsRecorder = require('./services/StatsRecorder');
+const StatsQuery = require('./services/StatsQuery');
+const AISummary = require('./services/AISummary');
 
 // 创建实例
 const statsRecorder = new StatsRecorder();
@@ -65,7 +69,9 @@ module.exports.aiSummary = aiSummary;
 aiSummary.start();
 
 // API路由
-const apiRoutes = require('./apiRoutes');
+const apiRoutes = require('./routes/apiRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+app.use('/admin', adminRoutes);
 app.use('/api', apiRoutes);
 
 // 启动服务器
