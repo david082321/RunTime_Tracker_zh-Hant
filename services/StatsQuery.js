@@ -1,5 +1,5 @@
 // StatsQuery.js - 查询模块
-const { mongoose } = require('./index');
+const { mongoose } = require('../index');
 
 // 引用数据模型
 const DailyStat = mongoose.model('DailyStat');
@@ -299,13 +299,7 @@ class StatsQuery {
             let currentApp = "Unknown";
             let runningSince = new Date();
             let isRunning = true;
-            let batteryLevel = 0;
-
-            // 获取最近电量
-            const batteryRecords = this.recorder.getBatteryStats(deviceId);
-            if (batteryRecords.length > 0) {
-                batteryLevel = batteryRecords[batteryRecords.length - 1].level;
-            }
+            const batteryInfo = this.recorder.getLatestBatteryInfo(deviceId);
 
             // 获取应用状态
             if (this.recorder.recentAppSwitches.has(deviceId) && this.recorder.recentAppSwitches.get(deviceId).length > 0) {
@@ -320,7 +314,9 @@ class StatsQuery {
                 currentApp,
                 running: isRunning,
                 runningSince,
-                batteryLevel
+                batteryLevel: batteryInfo.level,
+                isCharging: batteryInfo.isCharging,
+                batteryTimestamp: batteryInfo.timestamp
             };
         });
     }

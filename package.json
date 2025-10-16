@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node index.js",
+    "pm2": "pm2 start index.js --name \"runtime_tracker\"",
+    "pm2-no-daemon": "pm2 start index.js --name \"runtime_tracker\" --no-daemon"
   },
   "private": true,
   "keywords": [],
@@ -12,11 +14,14 @@
   "description": "",
   "dependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
+    "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
-    "node-cron": "^4.2.1"
+    "node-cron": "^4.2.1",
+    "pm2": "^5.4.3"
   }
 }
