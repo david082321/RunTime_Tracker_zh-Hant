@@ -34,6 +34,11 @@
 - 地址：[https://github.com/1812z/RunTime_Tracker_Web](https://github.com/1812z/RunTime_Tracker_Web)
 - 说明：基于 Vue.js 的 Web 界面，用于查看和分析时间跟踪数据
 
+### 后台管理
+- 地址：[https://github.com/1812z/Runtime_Tracker_Admin](https://github.com/1812z/Runtime_Tracker_Admin)
+- 说明：基于 Vue.js 的 Web 界面，用于连接到后端API以管理后台
+- CF托管在线配置： [点击即用](https://runtime-tracker-admin.pages.dev/login)
+
 ### Github嵌入图  
 [![我的~~娱乐~~开发设备](https://device-svg-generator.2023158207.workers.dev/devices-svg?api=https://api-usage.1812z.top/api/devices)]()
 - 说明：将API地址换成你的API地址即可嵌入使用
