@@ -1,5 +1,5 @@
 // StatsQuery.js - 查询模块
-const { mongoose } = require('./index');
+const { mongoose } = require('../index');
 
 // 引用数据模型
 const DailyStat = mongoose.model('DailyStat');
