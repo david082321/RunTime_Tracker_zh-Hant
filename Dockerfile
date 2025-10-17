@@ -10,6 +10,7 @@ COPY index.js ./
 COPY routes/ ./routes/
 COPY services/ ./services/
 COPY public/ ./public/
+COPY .example.env ./
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
