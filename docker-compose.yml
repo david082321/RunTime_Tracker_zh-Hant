@@ -25,7 +25,7 @@ services:
     environment:
       - PORT=3000
       - SECRET=${SECRET}
-      - MONGODB_URI=${MONGODB_URI:-mongodb://admin:password@mongodb:27017/deviceStats}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://admin:password@mongodb:27017/deviceStats?authSource=admin}
     depends_on:
       mongodb:
         condition: service_healthy
