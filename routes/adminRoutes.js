@@ -36,30 +36,30 @@ router.post('/login', async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                message: '用户名和密码不能为空'
+                message: '使用者名稱和密碼不能為空'
             });
         }
 
         if (username !== ADMIN_USER) {
             return res.status(401).json({
                 success: false,
-                message: '用户名或密码错误'
+                message: '使用者名稱或密碼錯誤'
             });
         }
 
         if (!ADMIN_PASSWD || typeof ADMIN_PASSWD !== 'string') {
-            console.error('错误: 密码哈希未正确配置');
+            console.error('錯誤: 密碼雜湊未正確配置');
             return res.status(500).json({
                 success: false,
-                message: '服务器配置错误：密码哈希未设置'
+                message: '伺服器配置錯誤：密碼雜湊未設定'
             });
         }
 
         if (!ADMIN_PASSWD.startsWith('$2')) {
-            console.error('错误: 密码哈希格式不正确');
+            console.error('錯誤: 密碼雜湊格式不正確');
             return res.status(500).json({
                 success: false,
-                message: '服务器配置错误：密码哈希格式无效'
+                message: '伺服器配置錯誤：密碼雜湊格式無效'
             });
         }
 
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({
                 success: false,
-                message: '用户名或密码错误'
+                message: '使用者名稱或密碼錯誤'
             });
         }
 
@@ -88,18 +88,18 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('登录错误:', error);
+        console.error('登入錯誤:', error);
 
         if (error.message.includes('Illegal arguments')) {
             return res.status(500).json({
                 success: false,
-                message: '服务器配置错误：密码哈希无效'
+                message: '伺服器配置錯誤：密碼雜湊無效'
             });
         }
 
         res.status(500).json({
             success: false,
-            message: '服务器内部错误'
+            message: '伺服器內部錯誤'
         });
     }
 });
@@ -116,7 +116,7 @@ router.post('/account/update', authenticateToken, async (req, res) => {
         if (!username && !password) {
             return res.status(400).json({
                 success: false,
-                message: '请提供要更新的用户名或密码'
+                message: '請提供要更新的使用者名稱或密碼'
             });
         }
 
@@ -147,7 +147,7 @@ router.post('/account/update', authenticateToken, async (req, res) => {
         if (username && username !== ADMIN_USER) {
             envMap.set('ADMIN_USER', username);
             process.env.ADMIN_USER = username;
-            updatedFields.push('用户名');
+            updatedFields.push('使用者名稱');
         }
 
         // 更新密码（加密后保存）
@@ -155,7 +155,7 @@ router.post('/account/update', authenticateToken, async (req, res) => {
             const hashedPassword = await bcrypt.hash(password, 10);
             envMap.set('ADMIN_PASSWD', hashedPassword);
             process.env.ADMIN_PASSWD = hashedPassword;
-            updatedFields.push('密码');
+            updatedFields.push('密碼');
         }
 
         // 生成新的 .env 内容
@@ -168,15 +168,15 @@ router.post('/account/update', authenticateToken, async (req, res) => {
 
         res.json({
             success: true,
-            message: `账户信息已更新（${updatedFields.join('、')})`,
+            message: `帳戶資訊已更新（${updatedFields.join('、')})`,
             requireRelogin: true
         });
 
     } catch (error) {
-        console.error('更新账户错误:', error);
+        console.error('更新帳戶錯誤:', error);
         res.status(500).json({
             success: false,
-            message: '更新账户失败',
+            message: '更新帳戶失敗',
             details: error.message
         });
     }
@@ -240,11 +240,11 @@ router.get('/config', authenticateToken, (req, res) => {
             PORT: process.env.PORT || 3000,
             MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/deviceStats',
             ADMIN_USER: process.env.ADMIN_USER || 'admin',
-            AI_API_URL: process.env.AI_API_URL || '未设置',
+            AI_API_URL: process.env.AI_API_URL || '未設定',
             AI_MODEL: process.env.AI_MODEL || 'gpt-4',
             AI_MAX_TOKENS: process.env.AI_MAX_TOKENS || 1000,
-            PUBLISH_API_URL: process.env.PUBLISH_API_URL || '未设置',
-            PUBLISH_API_KEY: process.env.PUBLISH_API_KEY || '未设置',
+            PUBLISH_API_URL: process.env.PUBLISH_API_URL || '未設定',
+            PUBLISH_API_KEY: process.env.PUBLISH_API_KEY || '未設定',
             DEFAULT_TIMEZONE_OFFSET: process.env.DEFAULT_TIMEZONE_OFFSET || 8,
             AI_SUMMARY_ENABLED: process.env.AI_SUMMARY_ENABLED || 'true',
             JWT_SECRET_MODE: process.env.JWT_SECRET ? 'static' : 'random_on_restart'
@@ -255,10 +255,10 @@ router.get('/config', authenticateToken, (req, res) => {
             config
         });
     } catch (error) {
-        console.error('获取配置错误:', error);
+        console.error('取得配置錯誤:', error);
         res.status(500).json({
             success: false,
-            message: '获取配置失败',
+            message: '取得配置失敗',
             details: error.message
         });
     }
@@ -275,7 +275,7 @@ router.post('/config', authenticateToken, async (req, res) => {
         if (!updates || Object.keys(updates).length === 0) {
             return res.status(400).json({
                 success: false,
-                message: '请提供要更新的配置项'
+                message: '請提供要更新的配置項'
             });
         }
 
@@ -299,7 +299,7 @@ router.post('/config', authenticateToken, async (req, res) => {
         if (invalidKeys.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: `不允许修改的配置项: ${invalidKeys.join(', ')}，管理员账户请使用专用接口修改`
+                message: `不允許修改的配置項: ${invalidKeys.join(', ')}，管理員帳戶請使用專用介面修改`
             });
         }
 
@@ -340,14 +340,14 @@ router.post('/config', authenticateToken, async (req, res) => {
             success: true,
             message: '配置已更新',
             updatedKeys,
-            notice: '部分配置需要重启服务才能生效'
+            notice: '部分配置需要重啟服務才能生效'
         });
 
     } catch (error) {
         console.error('修改配置错误:', error);
         res.status(500).json({
             success: false,
-            message: '修改配置失败',
+            message: '修改配置失敗',
             details: error.message
         });
     }
@@ -360,19 +360,19 @@ router.post('/restart', authenticateToken, (req, res) => {
 
     res.json({
         success: true,
-        message: '服务重启指令已发送，将在1秒后执行重启',
-        notice: '重启后所有用户需要重新登录',
+        message: '服務重啟指令已發送，將在1秒後執行重啟',
+        notice: '重啟後所有使用者需要重新登入',
         restartStatus: 'pending'
     });
 
     setTimeout(() => {
-        console.log('开始执行PM2重启...');
+        console.log('開始執行PM2重啟...');
         exec('pm2 restart runtime_tracker', (error, stdout, stderr) => {
             if (error) {
-                console.error('PM2 重启失败:', error);
+                console.error('PM2 重啟失敗:', error);
                 return;
             }
-            console.log('PM2 重启成功:', stdout);
+            console.log('PM2 重啟成功:', stdout);
         });
     }, 1000);
 });
