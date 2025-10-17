@@ -26,15 +26,6 @@ services:
       - PORT=3000
       - SECRET=${SECRET}
       - MONGODB_URI=${MONGODB_URI:-mongodb://admin:password@mongodb:27017/deviceStats}
-      - ADMIN_USER=${ADMIN_USER}
-      - ADMIN_PASSWD=${ADMIN_PASSWD}
-      - AI_API_URL=${AI_API_URL}
-      - AI_API_KEY=${AI_API_KEY}
-      - AI_MODEL=${AI_MODEL}
-      - AI_MAX_TOKENS=${AI_MAX_TOKENS}
-      - PUBLISH_API_URL=${PUBLISH_API_URL}
-      - PUBLISH_API_KEY=${PUBLISH_API_KEY}
-      - DEFAULT_TIMEZONE_OFFSET=${DEFAULT_TIMEZONE_OFFSET}
     depends_on:
       mongodb:
         condition: service_healthy
