@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { SECRET, statsRecorder, statsQuery, aiSummary } = require('./index');
+const { SECRET, statsRecorder, statsQuery, aiSummary } = require('../index');
+// 导入adminRoutes的认证中间件
+const { authenticateToken } = require('./adminRoutes');
 
 // 应用上报API
 router.post('/', async (req, res) => {
@@ -310,62 +312,6 @@ router.get('/ai/status', (req, res) => {
         model: aiSummary.aiConfig.model,
         defaultTimezone: `UTC${aiSummary.defaultTimezoneOffset >= 0 ? '+' : ''}${aiSummary.defaultTimezoneOffset}`
     });
-});
-
-// 停止AI定时任务（需要secret验证）
-router.post('/ai/stop', (req, res) => {
-    try {
-        // 验证secret (从query或body中获取)
-        const secret = req.query.secret || req.body.secret;
-
-        if (!secret || secret !== SECRET) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid or missing secret'
-            });
-        }
-
-        aiSummary.stop();
-        res.json({
-            success: true,
-            message: 'AI summary cron jobs stopped'
-        });
-    } catch (error) {
-        console.error('Error in /api/ai/stop:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to stop AI tasks',
-            details: error.message
-        });
-    }
-});
-
-// 启动AI定时任务（需要secret验证）
-router.post('/ai/start', (req, res) => {
-    try {
-        // 验证secret (从query或body中获取)
-        const secret = req.query.secret || req.body.secret;
-
-        if (!secret || secret !== SECRET) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid or missing secret'
-            });
-        }
-
-        aiSummary.start();
-        res.json({
-            success: true,
-            message: 'AI summary cron jobs started'
-        });
-    } catch (error) {
-        console.error('Error in /api/ai/start:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to start AI tasks',
-            details: error.message
-        });
-    }
 });
 
 // 预留：周总结API

@@ -1,5 +1,5 @@
 // StatsRecorder.js - 记录信息模块
-const { mongoose } = require('./index');
+const { mongoose } = require('../index');
 
 // 定义新的数据模型 - 按天/小时/应用存储
 const DailyStat = mongoose.model('DailyStat', {
@@ -17,7 +17,7 @@ class StatsRecorder {
         this.batteryInfo = new Map(); // {deviceId: {level, isCharging, timestamp}}
     }
 
-    // 记录电池信息和充电状态
+// 记录电池信息和充电状态
     recordBattery(deviceId, level, isCharging = false) {
         const now = new Date();
 
@@ -40,7 +40,6 @@ class StatsRecorder {
         }
         return info;
     }
-
 
     // 记录应用使用时间
     async recordUsage(deviceId, appName, running) {

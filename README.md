@@ -1,6 +1,8 @@
 # RunTime Tracker
 一个时间跟踪应用程序，用于监控和管理您的设备使用时间。
-<img width="3022" height="1040" alt="image" src="https://github.com/user-attachments/assets/72aa5a81-a3a1-4c90-8430-dfc5a3595daa" />
+
+<img width="2217" height="1742" alt="image" src="https://github.com/user-attachments/assets/9579f363-48ba-42b4-803a-b76ef99b4772" />
+
 
 ## 安装说明
 [查看安装说明](https://github.com/1812z/RunTime_Tracker/wiki/Installation)
@@ -34,10 +36,16 @@
 - 地址：[https://github.com/1812z/RunTime_Tracker_Web](https://github.com/1812z/RunTime_Tracker_Web)
 - 说明：基于 Vue.js 的 Web 界面，用于查看和分析时间跟踪数据
 
+### 后台管理(可选)
+- 地址：[https://github.com/1812z/Runtime_Tracker_Admin](https://github.com/1812z/Runtime_Tracker_Admin)
+- 说明：基于 Vue.js 的 Web 界面，用于连接到后端API以管理后台
+- CF托管在线配置(仅支持Https)： [点击即用](https://runtime-tracker-admin.pages.dev/login)
+
 ### Github嵌入图  
 [![我的~~娱乐~~开发设备](https://device-svg-generator.2023158207.workers.dev/devices-svg?api=https://api-usage.1812z.top/api/devices)]()
 - 说明：将API地址换成你的API地址即可嵌入使用
 - CF Worker节点: `https://device-svg-generator.2023158207.workers.dev/devices-svg?api={你的API}`
+
 ### 后端 (当前仓库)
 - Node.js 版本要求：22
 - 需要mongodb数据库链接

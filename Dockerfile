@@ -7,10 +7,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY index.js ./
-COPY apiRoutes.js ./
-COPY StatsRecorder.js ./
-COPY StatsQuery.js ./
-COPY AISummary.js ./
+COPY routes/ ./routes/
+COPY services/ ./services/
 COPY public/ ./public/
 
 RUN addgroup -g 1001 -S nodejs
